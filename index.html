@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -421,8 +421,182 @@
                     <section data-markdown>
                         ![Favorite](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYTlwenBzM2V3cXVpdXA0azliOTB4ajdmYjdzYW51OWthdzEwcHg1bSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/NiJmUCME4M6UB85hPW/giphy.gif)
                     </section>
+
+                    <section data-markdown>
+                        ## What is CTE?
+                        * Common Table Expression
+                        * Available in modern SQL databases
+                        * Also known as `WITH` clause
+                    </section>
+
+                    <section data-markdown>
+                        ## Basic principle
+                        ```sql
+                        WITH &lt;query_name_1&gt; AS (
+                            &lt;QUERY&gt;
+                        ),
+                        ...
+                        &lt;query_name_n&gt; AS (
+                            &lt;QUERY&gt;
+                        )
+                        &lt;RESULTING QUERY&gt;
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        <script type="text/template">
+                        * Creates "temporary" tables
+                        * Executed in a single transaction
+                            * No network delay <!-- .element: class="fragment" -->
+                            * Does not require transfer of huge datasets <!-- .element: class="fragment" -->
+                        </script>
+                    </section>
+
+                    <section data-markdown>
+                        ## Example #1
+                        Create two things at the same time
+                        ```sql
+                        WITH insert_user cte AS (
+                            INSERT INTO user (username) VALUES ('bitionaire') RETURNING id
+                        )
+                        INSERT INTO contact (user_id, first_name) VALUES (
+                            (SELECT id FROM insert_user),
+                            'Alice'
+                        );
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        ## Example #2
+                        Update with side-effects
+                        ```sql
+                        WITH update_account AS (
+                            UPDATE account SET balance = balance - 100 WHERE id = 1 RETURNING *
+                        ),
+                        insert_transaction AS (
+                            INSERT INTO transaction (account_id, amount) VALUES (1, -100)
+                        )
+                        SELECT * FROM update_account
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        ## Example #3
+                        Refer to own output
+                        ```sql
+                        WITH RECURSIVE cte(n) AS (
+                            VALUES (1)
+                          UNION ALL
+                            SELECT n + 1 FROM cte WHERE n &lt; 10
+                        )
+                        SELECT sum(n) FROM cte;
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        <script type="text/template">
+                            ## Example #4
+                            * You're the developer of an online bookstore
+                            * Books have authors _(n:m)_
+                            * Books have genres _(n:m)_
+                            * Implement <!-- .element: class="fragment" --> a `PUT` request
+                              * Including genres
+                              * Genres should be created if they do not exist
+                              * Response should include details of related entities
+                        </script>
+                    </section>
+
+                    <section data-markdown>
+                        ## Ready?
+                        ![Crazy](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOTU5c2xlZjIydndvOHNwMDh4cmtod2VpczN0d3VhZGVkNGQ5Z3QxZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/BbJdwrOsM7nTa/giphy.gif)
+                    </section>
+
+                    <section data-markdown>
+                        ### Example #4: Step 1
+                        Update the book
+                        ```sql
+                        WITH update_book AS (
+                            UPDATE book SET title = :title WHERE id = :bookId RETURNING *
+                        )
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        <script type="text/template">
+                            ### Example #4: Step 2
+                            Upsert genres
+                            ```sql
+                            WITH upsert_genres AS (
+                                INSERT INTO genre (name)
+                                    SELECT unnest(string_to_array(:genres, ','))
+                                ON CONFLICT (name)
+                                UPDATE SET name = excluded.name
+                                RETURNING *
+                            )
+                            ```
+                            unnest expands an array into a set of rows <!-- .element: class="fragment" -->
+                        </script>
+                    </section>
+
+                    <section data-markdown>
+                        ### Example #4: Step 3
+                        Associate genres
+                        ```sql
+                        WITH delete_current_genres AS (
+                            DELETE FROM book_genre WHERE book_id = :bookId
+                        ),
+                        insert_new_genres AS (
+                            INSERT INTO book_genre (book_id, genre_id)
+                            SELECT :bookId, id FROM upsert_genres
+                            RETURNING genre_id
+                        )
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        <script type="text/template">
+                            ### Example #4: Step 4
+                            Stitch it all together
+                            ```sql
+                            ...
+                            SELECT
+                            b.*,
+                            json_agg(
+                                json_build_object(
+                                    'id', g.id,
+                                    'name', g.name
+                                )
+                            ) AS genres,
+                            json_build_object('id', a.id, 'name', a.name) AS author
+                            FROM book b
+                            JOIN insert_new_genres bg ON b.id = bg.book_id
+                            JOIN upsert_genres g ON bg.genre_id = g.id
+                            JOIN author a ON b.author_id = a.id
+                            WHERE b.id = :bookId
+                            ```
+                            Joins are not correct, but you get the idea <!-- .element: class="fragment" -->
+                        </script>
+                    </section>
                 </section>
 
+                <section>
+                    <section data-markdown>
+                        <script type="text/template">
+                            # Last words
+                            * It's wort exploring the docs from time to time <!-- .element: class="fragment" -->
+                            * ... and comparing different options <!-- .element: class="fragment" -->
+                        </script>
+                    </section>
+
+                    <section data-markdown>
+                        ## Questions?
+                    </section>
+
+                    <section data-markdown>
+                        ## Thank you!
+                        ![Thank you](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbGV3bmswMjB2bWVmMW1qNDhhMnZnMzFzNnZvcTI4MnphcW5yNnhhOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/TKL99l61UBNnnQSx4o/giphy.gif)
+                    </section>
+                </section>
             </div>
         </div>
 
