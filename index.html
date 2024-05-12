@@ -247,17 +247,179 @@
                     </section>
 
                     <section data-markdown>
-                        ## Object mapper
+                        ## Mapping strategies
+                        1. Declarative
+                        2. Programmatically (i.e. `RowMapper`)
                     </section>
 
                     <section data-markdown>
-                        ## Enums
+                        ## Declarative example
+                        ```java
+                        public record Contact(
+                            @ColumnName("id") UUID id,
+                            @ColumnName("first_name") String firstName,
+                            @ColumnName("last_name") String lastName
+                        ) {}
+                        ```
+                        `@ColumnName("id")` is optional
+                    </section>
+
+                    <section data-markdown>
+                        <script type="text/template">
+                            ## Increased complexity
+                            ```sql
+                            SELECT
+                              u.id,
+                              u.username,
+                              c.id AS contact_id,
+                              c.first_name,
+                              c.last_name
+                            FROM "user" u
+                            LEFT JOIN contact c
+                            ON u.id = c.user_id
+                            ```
+                            How to map this to a Java object? <!-- .element: class="fragment" -->
+                        </script>
+                    </section>
+
+                    <section data-markdown>
+                        ```java
+                        // Contact.class
+                        public record Contact(
+                            @ColumnName("contact_id") UUID id,
+                            @ColumnName("first_name") String firstName,
+                            @ColumnName("first_name") String lastName
+                        ) {}
+                        ```
+                        ... but what about the User?
+                        ```java
+                        // User.class
+                        public record User(
+                            UUID id,
+                            String username,
+                            List&lt;Contact&gt; contacts
+                        ) {}
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        ### First step
+                        ```java
+                        public record User(
+                            UUID id,
+                            String username,
+                            List&lt;Contact&gt; contacts
+                        ) {
+
+                            @JdbiConstructor
+                            public User(
+                                @ColumnName("id") UUID id,
+                                @ColumnName("username") String username
+                            ) {
+                                this(id, username, new ArrayList<>());
+                            }
+                        }
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        ### Adding a `RowReducer`
+                        ```java
+                        public class UserReducer
+                            implements LinkedHashMapRowReducer&lt;UUID, User&gt; {
+
+                            @Override
+                            public void accumulate(
+                                final Map&lt;UUID, User&gt; container, final RowView rowView) {
+                                final var user = container.computeIfAbsent(
+                                    rowView.GetColumn("id", UUID.class),
+                                    id -> rowView.getRow(User.class));
+
+                                if (rowView.getColumn("contact_id", UUID.class) != null) {
+                                    user.getContacts().add(rowView.getRow(Contact.class));
+                                }
+                            }
+                        }
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        ### Usage
+                        ```java
+                        return jdbi.withHandle(handle -> {
+                            return handle.createQuery(QUERY)
+                                    .reduceRows(new UserReducer())
+                                    .list();
+                        });
+                        ```
                     </section>
                 </section>
 
                 <section>
                     <section data-markdown>
+                        # Enums
+                    </section>
+
+                    <section data-markdown>
+                        ### [PostreSQL example](https://www.postgresql.org/docs/current/datatype-enum.html)
+                        ```sql
+                        CREATE TYPE mood AS ENUM ('sad', 'ok', 'happy');
+                        CREATE TABLE person (
+                            name text,
+                            current_mood mood
+                        );
+
+                        INSERT INTO person VALUES ('Moe', 'happy');
+                        SELECT * FROM person WHERE current_mood = 'happy';
+                        name | current_mood
+                        ------+--------------
+                        Moe  | happy
+                        (1 row)
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        <script type="text/template">
+                            ## Altering enums
+                            * Add value <!-- .element: class="fragment" -->
+                                ```sql
+                                ALTER TYPE mood ADD VALUE 'ecstatic'; -- append
+
+                                ALTER TYPE mood ADD VALUE 'very_happy' AFTER 'happy';
+                                ALTER TYPE mood ADD VALUE 'angry' BEFORE 'sad';
+                                ```
+                            * Rename value <!-- .element: class="fragment" -->
+                                ```sql
+                                ALTER TYPE mood RENAME VALUE 'sad' TO 'unhappy';
+                                ```
+                            * Delete <!-- .element: class="fragment" --> __not available__! (drop & recreate)
+                        </script>
+                    </section>
+
+                    <section data-markdown>
+                        <script type="text/template">
+                            ## Enum Mapping
+                            ```java
+                            @EnumByName
+                            public enum Mood {
+                                SAD, OK, HAPPY
+                            }
+                            ```
+
+                            Do not use <!-- .element: class="fragment" --> `@EnumByOrdinal`
+                        </script>
+                    </section>
+                </section>
+
+
+                <section>
+                    <section data-markdown>
                         # CTE
+                        ... and other wizardry
+                    </section>
+
+                    <section data-markdown>
+                        ![Favorite](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYTlwenBzM2V3cXVpdXA0azliOTB4ajdmYjdzYW51OWthdzEwcHg1bSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/NiJmUCME4M6UB85hPW/giphy.gif)
                     </section>
                 </section>
 
