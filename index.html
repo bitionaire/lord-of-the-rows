@@ -12,102 +12,255 @@
 
         <!-- Theme used for syntax highlighted code -->
         <link rel="stylesheet" href="plugin/highlight/monokai.css">
+
+        <style>
+            pre.code-wrapper {
+                width: 100%;
+            }
+        </style>
     </head>
     <body>
         <div class="reveal">
             <div class="slides">
                 <section>
-                    <div style="display: flex; flex-direction: row; align-items: center; gap: 2vw;">
-                        <img src="https://avatars.githubusercontent.com/u/1539948?v=4"
-                             style="height: 10vh; width: 10vh; border-radius: 20vh" alt="bitionaire Avatar"/>
-                        <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                            <p style="margin-top: 0;">Johann <a href="https://github.com/bitionaire"><code>bitionaire</code></a>
-                                B&ouml;hler</p>
-                            <a href="https://github.com/bitionaire/lord-of-the-rows">github.com/bitionaire/lord-of-the-rows</a>
+                    <section data-markdown>
+                        ![Warmup](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM245MWhuNGp5anVzMmx0cTUyMGZvdGQ0ZmIybzZuazg5b2x0bjZhMCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/KGfN27VaQrBSvd1ii6/giphy-downsized-large.gif)
+                    </section>
+
+                    <section>
+                        <div style="display: flex; flex-direction: row; align-items: center; gap: 2vw;">
+                            <img src="https://avatars.githubusercontent.com/u/1539948?v=4"
+                                 style="height: 10vh; width: 10vh; border-radius: 20vh" alt="bitionaire Avatar"/>
+                            <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                                <p style="margin-top: 0;">Johann <a href="https://github.com/bitionaire"><code>bitionaire</code></a>
+                                    B&ouml;hler</p>
+                                <a href="https://github.com/bitionaire/lord-of-the-rows">github.com/bitionaire/lord-of-the-rows</a>
+                            </div>
                         </div>
-                    </div>
+                    </section>
+
+                    <section>
+                        <img src="https://see.fontimg.com/api/renderfont4/51mgZ/eyJyIjoiZnMiLCJoIjoxNDQsInciOjIwMDAsImZzIjo3MiwiZmdjIjoiI0YxRTZFNiIsImJnYyI6IiNCOTE5MTkiLCJ0IjoxfQ/TG9yZCBvZiB0aGUgcm93cw/ringbearer-medium.png"
+                             alt="Lord of the rows"/>
+                        <span>Mastering SQL databases</span>
+                        <div class="fragment"><span style="color: var(--r-link-color);">*</span> Java edition</div>
+                    </section>
+
+                    <section data-markdown>
+                        ## My ❤️ stack
+                        * [Flyway](https://flywaydb.org/) Database migrations
+                        * [Jdbi](https://jdbi.org/) SQL convenience
+                    </section>
+
+                    <section data-markdown>
+                        # Agenda
+                        * What is Jdbi?
+                        * Best practices
+                        * How to SQL
+                    </section>
                 </section>
 
                 <section>
-                    <img src="https://see.fontimg.com/api/renderfont4/51mgZ/eyJyIjoiZnMiLCJoIjoxNDQsInciOjIwMDAsImZzIjo3MiwiZmdjIjoiI0YxRTZFNiIsImJnYyI6IiNCOTE5MTkiLCJ0IjoxfQ/TG9yZCBvZiB0aGUgcm93cw/ringbearer-medium.png"
-                         alt="Lord of the rows"/>
+                    <section data-markdown>
+                        # What is [Jdbi](https://jdbi.org/)?
+                    </section>
+
+                    <section>
+                        <p>Jdbi is <span style="text-decoration: underline;">not</span> an ORM 👍</p>
+                        <div style="display: flex; gap: 2rem">
+                            <iframe width="480" height="270" src="https://www.youtube.com/embed/bpGvVI7NM_k"
+                                    title="DONT USE AN ORM | Prime Reacts" frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+                            <iframe width="480" height="270" src="https://www.youtube.com/embed/nWchov5Do-o"
+                                    title="The Only Database Abstraction You Need | Prime Reacts" frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                    </section>
+
+                    <section data-markdown>
+                        ## In a nutshell
+                        * Built on top of JDBC
+                        * Does not hide SQL away
+                        * Convenient mapping to Objects
+                    </section>
+
+                    <section data-markdown>
+                        ## Fluent API Example
+                        ```java
+                        final var QUERY =
+                            """
+                            SELECT *
+                            FROM contact
+                            WHERE firstname
+                            LIKE :firstname
+                            """;
+
+                        return jdbi.withHandle(handle -> {
+                            return handle.createQuery(QUERY)
+                                    .bind("firstname", "Alice")
+                                    .mapToBean(Contact.class)
+                                    .list();
+                        });
+                        ```
+                    </section>
+
+                    <section>
+                        <h2>4 Steps to SQL</h2>
+                        <ol>
+                            <li class="fragment">
+                                <div>Create context</div>
+                                <pre><code class="java">jdbi.withHandle((h) => {/* ... */})</code>
+                                </pre>
+                            </li>
+                            <li class="fragment">
+                                <div>Prepare statement</div>
+                                <pre><code class="java">handle.createQuery("...")</code></pre>
+                            </li>
+                            <li class="fragment">
+                                <div>Bind parameter</div>
+                                <pre><code class="java">bind("name", parameter)</code></pre>
+                            </li>
+                            <li class="fragment">
+                                <div>Map to object</div>
+                                <pre><code class="java">mapToBean(Object.class)</code></pre>
+                            </li>
+                        </ol>
+                    </section>
+
+                    <section data-markdown>
+                        ![Super](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTUyZnhmMW1xaTVieDQzNnUxNjhzMzdodDI4Z2hzaHA5YXl4YW50dyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ByeYxURXxPyptxD2ta/giphy-downsized-large.gif)
+                    </section>
+
+                    <section data-markdown>
+                        <script type="text/template">
+                            ## Benefits
+                            * Use of all SQL features ✅ <!-- .element: class="fragment" -->
+                            * IntelliJ syntax highlighting support ✅ <!-- .element: class="fragment" --> <code style="color: var(--r-link-color)">*</code> <!-- .element: class="fragment" -->
+                        </script>
+                    </section>
                 </section>
 
-                <section data-markdown>
-                    # Agenda
-                    * What is Jdbi?
-                    * Best practices
-                    * How to SQL
-                </section>
 
                 <section data-markdown>
-                    # What is [Jdbi](https://jdbi.org/)?
+                    # Best practices
                 </section>
 
                 <section>
-                    <p>Jdbi is <span style="text-decoration: underline;">not</span> an ORM 👍</p>
-                    <div style="display: flex; gap: 2rem">
-                        <iframe width="480" height="270" src="https://www.youtube.com/embed/bpGvVI7NM_k"
-                                title="DONT USE AN ORM | Prime Reacts" frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    <section data-markdown>
+                        <script type="text/template">
+                            ## Limitations
+                            * Syntax highlighting <!-- .element: class="fragment" -->
+                              * List parameters
+                                ```java
+                                "SELECT * FROM contact WHERE firstname IN (<firstnames>)"
+                                ```
+                              * Concatenation
+                                ```java
+                                "SELECT " + columns + " FROM contact"
+                                ```
+                            * Code formatting <!-- .element: class="fragment" -->
+                              * Multi-line Strings
+                              * `google-java-format` does not support SQL
+                        </script>
+                    </section>
 
-                        <iframe width="480" height="270" src="https://www.youtube.com/embed/nWchov5Do-o"
-                                title="The Only Database Abstraction You Need | Prime Reacts" frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                    </div>
-                </section>
+                    <section data-markdown>
+                        <script type="text/template">
+                            ## SQL files
+                            * Store <!-- .element: class="fragment" --> `.sql` files in `src/main/resources`
+                            * Use <!-- .element: class="fragment" --> `ClasspathSqlLocator`
+                              ```java
+                              ClasspathSqlLocator.getResource("query.sql"))
+                              ```
+                            * Exclude comments <!-- .element: class="fragment" -->
+                              ```java
+                              ClasspathSqlLocator.removingComments().getResource("query.sql"))
+                              ```
+                        </script>
+                    </section>
 
-                <section data-markdown>
-                    ## In a nutshell
-                    * Built on top of JDBC
-                    * Does not hide SQL away
-                    * Convenient mapping to Objects
-                </section>
+                    <section data-markdown>
+                        ```sql
+                        -- query.sql
+                        SELECT * FROM contact
+                        WHERE firstname = :firstname
+                        ```
 
-                <section data-markdown>
-                    ## Example
-                    ```java
-                    final var QUERY =
-                        """
-                        SELECT *
-                        FROM contact
-                        WHERE firstname
-                        LIKE :firstname
-                        """;
+                        ```java
+                        // Usage in code
+                        handle.createQuery(ClasspathSqlLocator.getResource("query.sql"))
+                        ```
+                        ✅ Integrated IntelliJ and DataGrip support
+                    </section>
 
-                    return jdbi.withHandle(handle -> {
-                        return handle.createQuery(QUERY)
-                                .bind("firstname", "Alice")
-                                .mapToBean(Contact.class)
-                                .list();
-                    });
-                    ```
+                    <section data-markdown>
+                        ## Formatting
+                        ```bash
+                        pg-formatter \
+                            --comma-break \
+                            --function-case lowercase  \
+                            --keyword-case uppercase \
+                            --spaces 2 \
+                            --inplace
+                            *.sql
+                        ```
+                        [github.com/darold/pgFormatter](https://github.com/darold/pgFormatter)
+                    </section>
                 </section>
 
                 <section>
-                    <h2>4 Steps to SQL</h2>
-                    <ol>
-                        <li class="fragment">
-                            <div>Create context</div>
-                            <pre><code class="java" style="overflow: visible;">jdbi.withHandle((h) => {/* ... */})</code>
-                            </pre>
-                        </li>
-                        <li class="fragment">
-                            <div>Prepare statement</div>
-                            <pre><code class="java">handle.createQuery("...")</code></pre>
-                        </li>
-                        <li class="fragment">
-                            <div>Bind parameter</div>
-                            <pre><code class="java">bind("name", parameter)</code></pre>
-                        </li>
-                        <li class="fragment">
-                            <div>Map to object</div>
-                            <pre><code class="java">mapToBean(Object.class)</code></pre>
-                        </li>
-                    </ol>
+                    <section data-markdown>
+                        # Declarative API
+                    </section>
+
+                    <section data-markdown>
+                        ## Declarative API
+                        ```
+                        interface ContactDao {
+                            @SqlQuery("SELECT * FROM contact WHERE firstname = :firstname")
+                            Contact findByFirstname(@Bind("firstname") String id);
+                        }
+
+                        Jdbi jdbi = Jdbi.create("jdbc:h2:mem:test");
+                        jdbi.installPlugin(new SqlObjectPlugin());
+                        jdbi.withExtension(ContactDao.class, dao -> {
+                        dao.findByFirstname("Alice");
+                        });
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        ### API Comparison
+                        | Fluent API | Declarative API |
+                        | --- | --- |
+                        | Highly flexible, e.g. dynamic queries | More concise & convenient |
+                        | Suited for complex queries | Better readability |
+                    </section>
                 </section>
+
+                <section>
+                    <section data-markdown>
+                        # More on Mappers
+                    </section>
+
+                    <section data-markdown>
+                        ## Object mapper
+                    </section>
+
+                    <section data-markdown>
+                        ## Enums
+                    </section>
+                </section>
+
+                <section>
+                    <section data-markdown>
+                        # CTE
+                    </section>
+                </section>
+
             </div>
         </div>
 
