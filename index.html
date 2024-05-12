@@ -581,6 +581,67 @@
 
                 <section>
                     <section data-markdown>
+                        # Testing
+                    </section>
+
+                    <section  data-markdown>
+                        ## Easy [Testcontainers](https://testcontainers.com/)
+                        ```java
+                        @BeforeALl
+                        static void beforeTests() {
+                            var postgres = new PostgreSQLContainer<>(
+                                DockerImageName.parse("postgres:16")
+                            );
+                            postgres.start();
+                        }
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        ## Rollback
+                        Wrap Jdbi in a transaction
+                        ```java
+                        @Autowired private Jdbi jdbi;
+                        private RepoUnderTest repo;
+                        private TransactionHandler transactionHandler;
+                        private Handle handle;
+
+                        @BeforeEach
+                        void beforeTest() {
+                            final var jdbiFacade = mock(Jdbi.class);
+
+                            this.transactionHandler = jdbi.getTransactionHandler();
+                            this.handle = jdbi.open();
+                            transactionHandler.begin(handle);
+
+                            doAnswer(
+                                invocation -> {
+                                    final var argument = invocation.getArgument(
+                                        0,
+                                        HandleConsumer.class
+                                    );
+                                    argument.useHandle(handle);
+                                    return null;
+                                    })
+                                .when(jdbiFacade)
+                                .useHandle(any());
+
+                            // ... other handle calls
+
+                            this.repo = new RepoUnderTest(jdbiFacade);
+                        }
+
+                        @AfterEach
+                        void afterTest() {
+                            transactionHandler.rollback(handle);
+                            this.handle.close();
+                        }
+                        ```
+                    </section>
+                </section>
+
+                <section>
+                    <section data-markdown>
                         <script type="text/template">
                             # Last words
                             * It's wort exploring the docs from time to time <!-- .element: class="fragment" -->
