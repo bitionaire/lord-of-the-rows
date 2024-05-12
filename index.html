@@ -1,130 +1,130 @@
 <!doctype html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <title>reveal.js</title>
+		<title>reveal.js</title>
 
-    <link rel="stylesheet" href="dist/reset.css">
-    <link rel="stylesheet" href="dist/reveal.css">
-    <link rel="stylesheet" href="dist/theme/night.css">
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+		<link rel="stylesheet" href="dist/theme/night.css">
 
-    <!-- Theme used for syntax highlighted code -->
-    <link rel="stylesheet" href="plugin/highlight/monokai.css">
-</head>
-<body>
-<div class="reveal">
-    <div class="slides">
-        <section>
-            <div style="display: flex; flex-direction: row; align-items: center; gap: 2vw;">
-                <img src="https://avatars.githubusercontent.com/u/1539948?v=4"
-                     style="height: 10vh; width: 10vh; border-radius: 20vh" alt="bitionaire Avatar"/>
-                <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                    <p style="margin-top: 0;">Johann <a href="https://github.com/bitionaire"><code>bitionaire</code></a>
-                        B&ouml;hler</p>
-                    <a href="https://github.com/bitionaire/lord-of-the-rows">github.com/bitionaire/lord-of-the-rows</a>
+        <!-- Theme used for syntax highlighted code -->
+        <link rel="stylesheet" href="plugin/highlight/monokai.css">
+    </head>
+    <body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <div style="display: flex; flex-direction: row; align-items: center; gap: 2vw;">
+                    <img src="https://avatars.githubusercontent.com/u/1539948?v=4"
+                         style="height: 10vh; width: 10vh; border-radius: 20vh" alt="bitionaire Avatar"/>
+                    <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                        <p style="margin-top: 0;">Johann <a href="https://github.com/bitionaire"><code>bitionaire</code></a>
+                            B&ouml;hler</p>
+                        <a href="https://github.com/bitionaire/lord-of-the-rows">github.com/bitionaire/lord-of-the-rows</a>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <section>
-            <img src="https://see.fontimg.com/api/renderfont4/51mgZ/eyJyIjoiZnMiLCJoIjoxNDQsInciOjIwMDAsImZzIjo3MiwiZmdjIjoiI0YxRTZFNiIsImJnYyI6IiNCOTE5MTkiLCJ0IjoxfQ/TG9yZCBvZiB0aGUgcm93cw/ringbearer-medium.png"
-                 alt="Lord of the rows"/>
-        </section>
+            <section>
+                <img src="https://see.fontimg.com/api/renderfont4/51mgZ/eyJyIjoiZnMiLCJoIjoxNDQsInciOjIwMDAsImZzIjo3MiwiZmdjIjoiI0YxRTZFNiIsImJnYyI6IiNCOTE5MTkiLCJ0IjoxfQ/TG9yZCBvZiB0aGUgcm93cw/ringbearer-medium.png"
+                     alt="Lord of the rows"/>
+            </section>
 
-        <section data-markdown>
-            # Agenda
-            * What is Jdbi?
-            * Best practices
-            * How to SQL
-        </section>
+            <section data-markdown>
+                # Agenda
+                * What is Jdbi?
+                * Best practices
+                * How to SQL
+            </section>
 
-        <section data-markdown>
-            # What is [Jdbi](https://jdbi.org/)?
-        </section>
+            <section data-markdown>
+                # What is [Jdbi](https://jdbi.org/)?
+            </section>
 
-        <section>
-            <p>Jdbi is <span style="text-decoration: underline;">not</span> an ORM 👍</p>
-            <div style="display: flex; gap: 2rem">
-                <iframe width="480" height="270" src="https://www.youtube.com/embed/bpGvVI7NM_k"
-                        title="DONT USE AN ORM | Prime Reacts" frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            <section>
+                <p>Jdbi is <span style="text-decoration: underline;">not</span> an ORM 👍</p>
+                <div style="display: flex; gap: 2rem">
+                    <iframe width="480" height="270" src="https://www.youtube.com/embed/bpGvVI7NM_k"
+                            title="DONT USE AN ORM | Prime Reacts" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
-                <iframe width="480" height="270" src="https://www.youtube.com/embed/nWchov5Do-o"
-                        title="The Only Database Abstraction You Need | Prime Reacts" frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-            </div>
-        </section>
+                    <iframe width="480" height="270" src="https://www.youtube.com/embed/nWchov5Do-o"
+                            title="The Only Database Abstraction You Need | Prime Reacts" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
+            </section>
 
-        <section data-markdown>
-            ## In a nutshell
-            * Built on top of JDBC
-            * Does not hide SQL away
-            * Convenient mapping to Objects
-        </section>
+            <section data-markdown>
+                ## In a nutshell
+                * Built on top of JDBC
+                * Does not hide SQL away
+                * Convenient mapping to Objects
+            </section>
 
-        <section data-markdown>
-            ## Example
-            ```java
-            final var QUERY =
-                """
-                SELECT *
-                FROM contact
-                WHERE firstname
-                LIKE :firstname
-                """;
+            <section data-markdown>
+                ## Example
+                ```java
+                final var QUERY =
+                    """
+                    SELECT *
+                    FROM contact
+                    WHERE firstname
+                    LIKE :firstname
+                    """;
 
-            return jdbi.withHandle(handle -> {
-                return handle.createQuery(QUERY)
-                        .bind("firstname", "Alice")
-                        .mapToBean(Contact.class)
-                        .list();
-            });
-            ```
-        </section>
+                return jdbi.withHandle(handle -> {
+                    return handle.createQuery(QUERY)
+                            .bind("firstname", "Alice")
+                            .mapToBean(Contact.class)
+                            .list();
+                });
+                ```
+            </section>
 
-        <section>
-            <h2>4 Steps to SQL</h2>
-            <ol>
-                <li class="fragment">
-                    <div>Create context</div>
-                    <pre><code class="java" style="overflow: visible;">jdbi.withHandle((h) => {/* ... */})</code>
-                    </pre>
-                </li>
-                <li class="fragment">
-                    <div>Prepare statement</div>
-                    <pre><code class="java">handle.createQuery("...")</code></pre>
-                </li>
-                <li class="fragment">
-                    <div>Bind parameter</div>
-                    <pre><code class="java">bind("name", parameter)</code></pre>
-                </li>
-                <li class="fragment">
-                    <div>Map to object</div>
-                    <pre><code class="java">mapToBean(Object.class)</code></pre>
-                </li>
-            </ol>
-        </section>
+            <section>
+                <h2>4 Steps to SQL</h2>
+                <ol>
+                    <li class="fragment">
+                        <div>Create context</div>
+                        <pre><code class="java" style="overflow: visible;">jdbi.withHandle((h) => {/* ... */})</code>
+                        </pre>
+                    </li>
+                    <li class="fragment">
+                        <div>Prepare statement</div>
+                        <pre><code class="java">handle.createQuery("...")</code></pre>
+                    </li>
+                    <li class="fragment">
+                        <div>Bind parameter</div>
+                        <pre><code class="java">bind("name", parameter)</code></pre>
+                    </li>
+                    <li class="fragment">
+                        <div>Map to object</div>
+                        <pre><code class="java">mapToBean(Object.class)</code></pre>
+                    </li>
+                </ol>
+            </section>
+        </div>
     </div>
-</div>
 
-<script src="dist/reveal.js"></script>
-<script src="plugin/notes/notes.js"></script>
-<script src="plugin/markdown/markdown.js"></script>
-<script src="plugin/highlight/highlight.js"></script>
-<script>
-    // More info about initialization & config:
-    // - https://revealjs.com/initialization/
-    // - https://revealjs.com/config/
-    Reveal.initialize({
-        hash: true,
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+		<script src="plugin/markdown/markdown.js"></script>
+		<script src="plugin/highlight/highlight.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
 
-        // Learn about plugins: https://revealjs.com/plugins/
-        plugins: [RevealMarkdown, RevealHighlight, RevealNotes]
-    });
-</script>
-</body>
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+	</body>
 </html>
