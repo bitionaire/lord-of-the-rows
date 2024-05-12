@@ -4,22 +4,662 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+		<title>Lord of the rows</title>
 
 		<link rel="stylesheet" href="dist/reset.css">
 		<link rel="stylesheet" href="dist/reveal.css">
-		<link rel="stylesheet" href="dist/theme/black.css">
+		<link rel="stylesheet" href="dist/theme/night.css">
 
-		<!-- Theme used for syntax highlighted code -->
-		<link rel="stylesheet" href="plugin/highlight/monokai.css">
-	</head>
-	<body>
-		<div class="reveal">
-			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
-			</div>
-		</div>
+        <!-- Theme used for syntax highlighted code -->
+        <link rel="stylesheet" href="plugin/highlight/monokai.css">
+
+        <style>
+            pre.code-wrapper {
+                width: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="reveal">
+            <div class="slides">
+                <section>
+                    <section data-markdown>
+                        ![Warmup](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM245MWhuNGp5anVzMmx0cTUyMGZvdGQ0ZmIybzZuazg5b2x0bjZhMCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/KGfN27VaQrBSvd1ii6/giphy-downsized-large.gif)
+                    </section>
+
+                    <section>
+                        <div style="display: flex; flex-direction: row; align-items: center; gap: 2vw;">
+                            <img src="https://avatars.githubusercontent.com/u/1539948?v=4"
+                                 style="height: 10vh; width: 10vh; border-radius: 20vh" alt="bitionaire Avatar"/>
+                            <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                                <p style="margin-top: 0;">Johann <a href="https://github.com/bitionaire"><code>bitionaire</code></a>
+                                    B&ouml;hler</p>
+                                <a href="https://github.com/bitionaire/lord-of-the-rows">github.com/bitionaire/lord-of-the-rows</a>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <img src="https://see.fontimg.com/api/renderfont4/51mgZ/eyJyIjoiZnMiLCJoIjoxNDQsInciOjIwMDAsImZzIjo3MiwiZmdjIjoiI0YxRTZFNiIsImJnYyI6IiNCOTE5MTkiLCJ0IjoxfQ/TG9yZCBvZiB0aGUgcm93cw/ringbearer-medium.png"
+                             alt="Lord of the rows"/>
+                        <span>Mastering SQL databases</span>
+                        <div class="fragment"><span style="color: var(--r-link-color);">*</span> Java edition</div>
+                    </section>
+
+                    <section data-markdown>
+                        ## My ❤️ stack
+                        * [Flyway](https://flywaydb.org/) Database migrations
+                        * [Jdbi](https://jdbi.org/) SQL convenience
+                    </section>
+
+                    <section data-markdown>
+                        # Agenda
+                        * What is Jdbi?
+                        * Best practices
+                        * How to SQL
+                    </section>
+                </section>
+
+                <section>
+                    <section data-markdown>
+                        # What is [Jdbi](https://jdbi.org/)?
+                    </section>
+
+                    <section>
+                        <p>Jdbi is <span style="text-decoration: underline;">not</span> an ORM 👍</p>
+                        <div style="display: flex; gap: 2rem">
+                            <iframe width="480" height="270" src="https://www.youtube.com/embed/bpGvVI7NM_k"
+                                    title="DONT USE AN ORM | Prime Reacts" frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+                            <iframe width="480" height="270" src="https://www.youtube.com/embed/nWchov5Do-o"
+                                    title="The Only Database Abstraction You Need | Prime Reacts" frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                    </section>
+
+                    <section data-markdown>
+                        ## In a nutshell
+                        * Built on top of JDBC
+                        * Does not hide SQL away
+                        * Convenient mapping to Objects
+                    </section>
+
+                    <section data-markdown>
+                        ## Fluent API Example
+                        ```java
+                        final var QUERY =
+                            """
+                            SELECT *
+                            FROM contact
+                            WHERE firstname
+                            LIKE :firstname
+                            """;
+
+                        return jdbi.withHandle(handle -> {
+                            return handle.createQuery(QUERY)
+                                    .bind("firstname", "Alice")
+                                    .mapToBean(Contact.class)
+                                    .list();
+                        });
+                        ```
+                    </section>
+
+                    <section>
+                        <h2>4 Steps to SQL</h2>
+                        <ol>
+                            <li class="fragment">
+                                <div>Create context</div>
+                                <pre><code class="java">jdbi.withHandle((h) => {/* ... */})</code>
+                                </pre>
+                            </li>
+                            <li class="fragment">
+                                <div>Prepare statement</div>
+                                <pre><code class="java">handle.createQuery("...")</code></pre>
+                            </li>
+                            <li class="fragment">
+                                <div>Bind parameter</div>
+                                <pre><code class="java">bind("name", parameter)</code></pre>
+                            </li>
+                            <li class="fragment">
+                                <div>Map to object</div>
+                                <pre><code class="java">mapToBean(Object.class)</code></pre>
+                            </li>
+                        </ol>
+                    </section>
+
+                    <section data-markdown>
+                        ![Super](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTUyZnhmMW1xaTVieDQzNnUxNjhzMzdodDI4Z2hzaHA5YXl4YW50dyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ByeYxURXxPyptxD2ta/giphy-downsized-large.gif)
+                    </section>
+
+                    <section data-markdown>
+                        <script type="text/template">
+                            ## Benefits
+                            * Use of all SQL features ✅ <!-- .element: class="fragment" -->
+                            * IntelliJ syntax highlighting support ✅ <!-- .element: class="fragment" --> <code style="color: var(--r-link-color)">*</code> <!-- .element: class="fragment" -->
+                        </script>
+                    </section>
+                </section>
+
+
+                <section data-markdown>
+                    # Best practices
+                </section>
+
+                <section>
+                    <section data-markdown>
+                        <script type="text/template">
+                            ## Limitations
+                            * Syntax highlighting <!-- .element: class="fragment" -->
+                              * List parameters
+                                ```java
+                                "SELECT * FROM contact WHERE firstname IN (<firstnames>)"
+                                ```
+                              * Concatenation
+                                ```java
+                                "SELECT " + columns + " FROM contact"
+                                ```
+                            * Code formatting <!-- .element: class="fragment" -->
+                              * Multi-line Strings
+                              * `google-java-format` does not support SQL
+                        </script>
+                    </section>
+
+                    <section data-markdown>
+                        <script type="text/template">
+                            ## SQL files
+                            * Store <!-- .element: class="fragment" --> `.sql` files in `src/main/resources`
+                            * Use <!-- .element: class="fragment" --> `ClasspathSqlLocator`
+                              ```java
+                              ClasspathSqlLocator.getResource("query.sql"))
+                              ```
+                            * Exclude comments <!-- .element: class="fragment" -->
+                              ```java
+                              ClasspathSqlLocator.removingComments().getResource("query.sql"))
+                              ```
+                        </script>
+                    </section>
+
+                    <section data-markdown>
+                        ```sql
+                        -- query.sql
+                        SELECT * FROM contact
+                        WHERE firstname = :firstname
+                        ```
+
+                        ```java
+                        // Usage in code
+                        handle.createQuery(ClasspathSqlLocator.getResource("query.sql"))
+                        ```
+                        ✅ Integrated IntelliJ and DataGrip support
+                    </section>
+
+                    <section data-markdown>
+                        ## Formatting
+                        ```bash
+                        pg-formatter \
+                            --comma-break \
+                            --function-case lowercase  \
+                            --keyword-case uppercase \
+                            --spaces 2 \
+                            --inplace
+                            *.sql
+                        ```
+                        [github.com/darold/pgFormatter](https://github.com/darold/pgFormatter)
+                    </section>
+                </section>
+
+                <section>
+                    <section data-markdown>
+                        # Declarative API
+                    </section>
+
+                    <section data-markdown>
+                        ## Declarative API
+                        ```
+                        interface ContactDao {
+                            @SqlQuery("SELECT * FROM contact WHERE firstname = :firstname")
+                            Contact findByFirstname(@Bind("firstname") String id);
+                        }
+
+                        Jdbi jdbi = Jdbi.create("jdbc:h2:mem:test");
+                        jdbi.installPlugin(new SqlObjectPlugin());
+                        jdbi.withExtension(ContactDao.class, dao -> {
+                        dao.findByFirstname("Alice");
+                        });
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        ### API Comparison
+                        | Fluent API | Declarative API |
+                        | --- | --- |
+                        | Highly flexible, e.g. dynamic queries | More concise & convenient |
+                        | Suited for complex queries | Better readability |
+                    </section>
+                </section>
+
+                <section>
+                    <section data-markdown>
+                        # More on Mappers
+                    </section>
+
+                    <section data-markdown>
+                        ## Mapping strategies
+                        1. Declarative
+                        2. Programmatically (i.e. `RowMapper`)
+                    </section>
+
+                    <section data-markdown>
+                        ## Declarative example
+                        ```java
+                        public record Contact(
+                            @ColumnName("id") UUID id,
+                            @ColumnName("first_name") String firstName,
+                            @ColumnName("last_name") String lastName
+                        ) {}
+                        ```
+                        `@ColumnName("id")` is optional
+                    </section>
+
+                    <section data-markdown>
+                        <script type="text/template">
+                            ## Increased complexity
+                            ```sql
+                            SELECT
+                              u.id,
+                              u.username,
+                              c.id AS contact_id,
+                              c.first_name,
+                              c.last_name
+                            FROM "user" u
+                            LEFT JOIN contact c
+                            ON u.id = c.user_id
+                            ```
+                            How to map this to a Java object? <!-- .element: class="fragment" -->
+                        </script>
+                    </section>
+
+                    <section data-markdown>
+                        ```java
+                        // Contact.class
+                        public record Contact(
+                            @ColumnName("contact_id") UUID id,
+                            @ColumnName("first_name") String firstName,
+                            @ColumnName("first_name") String lastName
+                        ) {}
+                        ```
+                        ... but what about the User?
+                        ```java
+                        // User.class
+                        public record User(
+                            UUID id,
+                            String username,
+                            List&lt;Contact&gt; contacts
+                        ) {}
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        ### First step
+                        ```java
+                        public record User(
+                            UUID id,
+                            String username,
+                            List&lt;Contact&gt; contacts
+                        ) {
+
+                            @JdbiConstructor
+                            public User(
+                                @ColumnName("id") UUID id,
+                                @ColumnName("username") String username
+                            ) {
+                                this(id, username, new ArrayList<>());
+                            }
+                        }
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        ### Adding a `RowReducer`
+                        ```java
+                        public class UserReducer
+                            implements LinkedHashMapRowReducer&lt;UUID, User&gt; {
+
+                            @Override
+                            public void accumulate(
+                                final Map&lt;UUID, User&gt; container, final RowView rowView) {
+                                final var user = container.computeIfAbsent(
+                                    rowView.GetColumn("id", UUID.class),
+                                    id -> rowView.getRow(User.class));
+
+                                if (rowView.getColumn("contact_id", UUID.class) != null) {
+                                    user.getContacts().add(rowView.getRow(Contact.class));
+                                }
+                            }
+                        }
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        ### Usage
+                        ```java
+                        return jdbi.withHandle(handle -> {
+                            return handle.createQuery(QUERY)
+                                    .reduceRows(new UserReducer())
+                                    .list();
+                        });
+                        ```
+                    </section>
+                </section>
+
+                <section>
+                    <section data-markdown>
+                        # Enums
+                    </section>
+
+                    <section data-markdown>
+                        ### [PostreSQL example](https://www.postgresql.org/docs/current/datatype-enum.html)
+                        ```sql
+                        CREATE TYPE mood AS ENUM ('sad', 'ok', 'happy');
+                        CREATE TABLE person (
+                            name text,
+                            current_mood mood
+                        );
+
+                        INSERT INTO person VALUES ('Moe', 'happy');
+                        SELECT * FROM person WHERE current_mood = 'happy';
+                        name | current_mood
+                        ------+--------------
+                        Moe  | happy
+                        (1 row)
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        <script type="text/template">
+                            ## Altering enums
+                            * Add value <!-- .element: class="fragment" -->
+                                ```sql
+                                ALTER TYPE mood ADD VALUE 'ecstatic'; -- append
+
+                                ALTER TYPE mood ADD VALUE 'very_happy' AFTER 'happy';
+                                ALTER TYPE mood ADD VALUE 'angry' BEFORE 'sad';
+                                ```
+                            * Rename value <!-- .element: class="fragment" -->
+                                ```sql
+                                ALTER TYPE mood RENAME VALUE 'sad' TO 'unhappy';
+                                ```
+                            * Delete <!-- .element: class="fragment" --> __not available__! (drop & recreate)
+                        </script>
+                    </section>
+
+                    <section data-markdown>
+                        <script type="text/template">
+                            ## Enum Mapping
+                            ```java
+                            @EnumByName
+                            public enum Mood {
+                                SAD, OK, HAPPY
+                            }
+                            ```
+
+                            Do not use <!-- .element: class="fragment" --> `@EnumByOrdinal`
+                        </script>
+                    </section>
+                </section>
+
+
+                <section>
+                    <section data-markdown>
+                        # CTE
+                        ... and other wizardry
+                    </section>
+
+                    <section data-markdown>
+                        ![Favorite](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYTlwenBzM2V3cXVpdXA0azliOTB4ajdmYjdzYW51OWthdzEwcHg1bSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/NiJmUCME4M6UB85hPW/giphy.gif)
+                    </section>
+
+                    <section data-markdown>
+                        ## What is CTE?
+                        * Common Table Expression
+                        * Available in modern SQL databases
+                        * Also known as `WITH` clause
+                    </section>
+
+                    <section data-markdown>
+                        ## Basic principle
+                        ```sql
+                        WITH &lt;query_name_1&gt; AS (
+                            &lt;QUERY&gt;
+                        ),
+                        ...
+                        &lt;query_name_n&gt; AS (
+                            &lt;QUERY&gt;
+                        )
+                        &lt;RESULTING QUERY&gt;
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        <script type="text/template">
+                        * Creates "temporary" tables
+                        * Executed in a single transaction
+                            * No network delay <!-- .element: class="fragment" -->
+                            * Does not require transfer of huge datasets <!-- .element: class="fragment" -->
+                        </script>
+                    </section>
+
+                    <section data-markdown>
+                        ## Example #1
+                        Create two things at the same time
+                        ```sql
+                        WITH insert_user cte AS (
+                            INSERT INTO user (username) VALUES ('bitionaire') RETURNING id
+                        )
+                        INSERT INTO contact (user_id, first_name) VALUES (
+                            (SELECT id FROM insert_user),
+                            'Alice'
+                        );
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        ## Example #2
+                        Update with side-effects
+                        ```sql
+                        WITH update_account AS (
+                            UPDATE account SET balance = balance - 100 WHERE id = 1 RETURNING *
+                        ),
+                        insert_transaction AS (
+                            INSERT INTO transaction (account_id, amount) VALUES (1, -100)
+                        )
+                        SELECT * FROM update_account
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        ## Example #3
+                        Refer to own output
+                        ```sql
+                        WITH RECURSIVE cte(n) AS (
+                            VALUES (1)
+                          UNION ALL
+                            SELECT n + 1 FROM cte WHERE n &lt; 10
+                        )
+                        SELECT sum(n) FROM cte;
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        <script type="text/template">
+                            ## Example #4
+                            * You're the developer of an online bookstore
+                            * Books have authors _(n:m)_
+                            * Books have genres _(n:m)_
+                            * Implement <!-- .element: class="fragment" --> a `PUT` request
+                              * Including genres
+                              * Genres should be created if they do not exist
+                              * Response should include details of related entities
+                        </script>
+                    </section>
+
+                    <section data-markdown>
+                        ## Ready?
+                        ![Crazy](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOTU5c2xlZjIydndvOHNwMDh4cmtod2VpczN0d3VhZGVkNGQ5Z3QxZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/BbJdwrOsM7nTa/giphy.gif)
+                    </section>
+
+                    <section data-markdown>
+                        ### Example #4: Step 1
+                        Update the book
+                        ```sql
+                        WITH update_book AS (
+                            UPDATE book SET title = :title WHERE id = :bookId RETURNING *
+                        )
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        <script type="text/template">
+                            ### Example #4: Step 2
+                            Upsert genres
+                            ```sql
+                            WITH upsert_genres AS (
+                                INSERT INTO genre (name)
+                                    SELECT unnest(string_to_array(:genres, ','))
+                                ON CONFLICT (name)
+                                UPDATE SET name = excluded.name
+                                RETURNING *
+                            )
+                            ```
+                            unnest expands an array into a set of rows <!-- .element: class="fragment" -->
+                        </script>
+                    </section>
+
+                    <section data-markdown>
+                        ### Example #4: Step 3
+                        Associate genres
+                        ```sql
+                        WITH delete_current_genres AS (
+                            DELETE FROM book_genre WHERE book_id = :bookId
+                        ),
+                        insert_new_genres AS (
+                            INSERT INTO book_genre (book_id, genre_id)
+                            SELECT :bookId, id FROM upsert_genres
+                            RETURNING genre_id
+                        )
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        <script type="text/template">
+                            ### Example #4: Step 4
+                            Stitch it all together
+                            ```sql
+                            ...
+                            SELECT
+                            b.*,
+                            json_agg(
+                                json_build_object(
+                                    'id', g.id,
+                                    'name', g.name
+                                )
+                            ) AS genres,
+                            json_build_object('id', a.id, 'name', a.name) AS author
+                            FROM book b
+                            JOIN insert_new_genres bg ON b.id = bg.book_id
+                            JOIN upsert_genres g ON bg.genre_id = g.id
+                            JOIN author a ON b.author_id = a.id
+                            WHERE b.id = :bookId
+                            ```
+                            Joins are not correct, but you get the idea <!-- .element: class="fragment" -->
+                        </script>
+                    </section>
+                </section>
+
+                <section>
+                    <section data-markdown>
+                        # Testing
+                    </section>
+
+                    <section  data-markdown>
+                        ## Easy [Testcontainers](https://testcontainers.com/)
+                        ```java
+                        @BeforeALl
+                        static void beforeTests() {
+                            var postgres = new PostgreSQLContainer<>(
+                                DockerImageName.parse("postgres:16")
+                            );
+                            postgres.start();
+                        }
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        ## Rollback
+                        Wrap Jdbi in a transaction
+                        ```java
+                        @Autowired private Jdbi jdbi;
+                        private RepoUnderTest repo;
+                        private TransactionHandler transactionHandler;
+                        private Handle handle;
+
+                        @BeforeEach
+                        void beforeTest() {
+                            final var jdbiFacade = mock(Jdbi.class);
+
+                            this.transactionHandler = jdbi.getTransactionHandler();
+                            this.handle = jdbi.open();
+                            transactionHandler.begin(handle);
+
+                            doAnswer(
+                                invocation -> {
+                                    final var argument = invocation.getArgument(
+                                        0,
+                                        HandleConsumer.class
+                                    );
+                                    argument.useHandle(handle);
+                                    return null;
+                                    })
+                                .when(jdbiFacade)
+                                .useHandle(any());
+
+                            // ... other handle calls
+
+                            this.repo = new RepoUnderTest(jdbiFacade);
+                        }
+
+                        @AfterEach
+                        void afterTest() {
+                            transactionHandler.rollback(handle);
+                            this.handle.close();
+                        }
+                        ```
+                    </section>
+                </section>
+
+                <section>
+                    <section data-markdown>
+                        <script type="text/template">
+                            # Last words
+                            * It's wort exploring the docs from time to time <!-- .element: class="fragment" -->
+                            * ... and comparing different options <!-- .element: class="fragment" -->
+                        </script>
+                    </section>
+
+                    <section data-markdown>
+                        ## Questions?
+                    </section>
+
+                    <section data-markdown>
+                        ## Thank you!
+                        ![Thank you](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbGV3bmswMjB2bWVmMW1qNDhhMnZnMzFzNnZvcTI4MnphcW5yNnhhOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/TKL99l61UBNnnQSx4o/giphy.gif)
+                    </section>
+                </section>
+            </div>
+        </div>
 
 		<script src="dist/reveal.js"></script>
 		<script src="plugin/notes/notes.js"></script>
