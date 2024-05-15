@@ -28,15 +28,13 @@
                     </section>
 
                     <section>
-                        <div style="display: flex; flex-direction: row; align-items: center; gap: 2vw;">
+                        <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 2vw;">
                             <img src="https://avatars.githubusercontent.com/u/1539948?v=4"
-                                 style="height: 10vh; width: 10vh; border-radius: 20vh" alt="bitionaire Avatar"/>
-                            <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                                <p style="margin-top: 0;">Johann <a href="https://github.com/bitionaire"><code>bitionaire</code></a>
-                                    B&ouml;hler</p>
-                                <a href="https://github.com/bitionaire/lord-of-the-rows">github.com/bitionaire/lord-of-the-rows</a>
-                            </div>
+                                 style="height: 2em; width: 2em; border-radius: 20vh" alt="bitionaire Avatar"/>
+                            <p style="margin: 0;">Johann <a href="https://github.com/bitionaire"><code>bitionaire</code></a>
+                                B&ouml;hler</p>
                         </div>
+                        <a href="https://github.com/bitionaire/lord-of-the-rows">github.com/bitionaire/lord-of-the-rows</a>
                     </section>
 
                     <section>
@@ -53,10 +51,15 @@
                     </section>
 
                     <section data-markdown>
+                        ## Motivation
+                        🤵Experience from **recent projects** ⚭ Opening **discussion** on different approaches 👰
+                    </section>
+
+                    <section data-markdown>
                         # Agenda
                         * What is Jdbi?
-                        * Best practices
-                        * How to SQL
+                        * Nice Jdbi features
+                        * SQL magic
                     </section>
                 </section>
 
@@ -81,10 +84,12 @@
                     </section>
 
                     <section data-markdown>
-                        ## In a nutshell
-                        * Built on top of JDBC
-                        * Does not hide SQL away
-                        * Convenient mapping to Objects
+                        <script type="text/template">
+                        ## In a 🥜
+                        * Built on top of JDBC <!-- .element: class="fragment" -->
+                        * Does not hide SQL away <!-- .element: class="fragment" -->
+                        * Convenient mapping to Objects <!-- .element: class="fragment" -->
+                        </script>
                     </section>
 
                     <section data-markdown>
@@ -137,23 +142,29 @@
                     <section data-markdown>
                         <script type="text/template">
                             ## Benefits
-                            * Use of all SQL features ✅ <!-- .element: class="fragment" -->
+                            * Use all SQL features ✅ <!-- .element: class="fragment" -->
+                            * Decent documentation ✅ <!-- .element: class="fragment" -->
                             * IntelliJ syntax highlighting support ✅ <!-- .element: class="fragment" --> <code style="color: var(--r-link-color)">*</code> <!-- .element: class="fragment" -->
                         </script>
                     </section>
                 </section>
 
-
                 <section data-markdown>
-                    # Best practices
+                    > "The secret to getting ahead is getting started."
+
+                    Mark Twain
                 </section>
 
                 <section>
                     <section data-markdown>
+                        # Formatting
+                    </section>
+
+                    <section data-markdown>
                         <script type="text/template">
                             ## Limitations
                             * Syntax highlighting <!-- .element: class="fragment" -->
-                              * List parameters
+                              * [List parameters](https://youtrack.jetbrains.com/issue/IDEA-260366)
                                 ```java
                                 "SELECT * FROM contact WHERE firstname IN (<firstnames>)"
                                 ```
@@ -188,12 +199,12 @@
                         SELECT * FROM contact
                         WHERE firstname = :firstname
                         ```
+                        (Re-usable in IntelliJ)
 
                         ```java
                         // Usage in code
                         handle.createQuery(ClasspathSqlLocator.getResource("query.sql"))
                         ```
-                        ✅ Integrated IntelliJ and DataGrip support
                     </section>
 
                     <section data-markdown>
@@ -218,42 +229,81 @@
 
                     <section data-markdown>
                         ## Declarative API
-                        ```
+                        ```java
                         interface ContactDao {
                             @SqlQuery("SELECT * FROM contact WHERE firstname = :firstname")
                             Contact findByFirstname(@Bind("firstname") String id);
                         }
 
-                        Jdbi jdbi = Jdbi.create("jdbc:h2:mem:test");
+                        // Initialize Jdbi
+                        final var jdbi = Jdbi.create("jdbc:...");
                         jdbi.installPlugin(new SqlObjectPlugin());
-                        jdbi.withExtension(ContactDao.class, dao -> {
-                        dao.findByFirstname("Alice");
-                        });
+
+                        // Instantiate DAO through Jdbi
+                        final var dao = jdbi.onDemand(ContactDao.class);
                         ```
                     </section>
 
                     <section data-markdown>
-                        ### API Comparison
-                        | Fluent API | Declarative API |
-                        | --- | --- |
-                        | Highly flexible, e.g. dynamic queries | More concise & convenient |
-                        | Suited for complex queries | Better readability |
+                        ### Transactions
+                        ```java
+                        interface TransactionalDao {
+
+                            // ...
+
+                            @Transaction
+                            default void insertTwoThings(A a, B b) {
+                                insertA(a);
+                                insertB(b);
+                            }
+                        }
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        <script type="text/template">
+                            ### API Comparison
+                            * More concise ✅ <!-- .element: class="fragment" -->
+                            * More convenient ✅ <!-- .element: class="fragment" -->
+                            * Easier to read ✅ <!-- .element: class="fragment" -->
+                        </script>
+                    </section>
+
+                    <section>
+                        Try to use it <span style="color: var(--r-link-color);">*</span>
+                        <div class="fragment">... if you use the <span style="color: var(--r-link-color);">*</span>, or else it's tedious</div>
                     </section>
                 </section>
 
                 <section>
                     <section data-markdown>
-                        # More on Mappers
+                        # Object Mapping
                     </section>
 
                     <section data-markdown>
                         ## Mapping strategies
-                        1. Declarative
-                        2. Programmatically (i.e. `RowMapper`)
+                        1. Programmatically (i.e. `RowMapper`)
+                        2. Declarative
                     </section>
 
                     <section data-markdown>
-                        ## Declarative example
+                        ## `RowMapper`
+                        ```java
+                        public class ContactRowMapper implements RowMapper&lt;Contact&gt; {
+                            @Override
+                            public Contact map(ResultSet rs, StatementContext ctx) throws SQLException {
+                                final var id = rs.getObject("id", UUID.class);
+                                final var firstName = rs.getString("first_name");
+                                final var lastName = rs.getString("last_name");
+
+                                return new Contact(id, firstName, lastName);
+                            }
+                        }
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        ## Declarative mapping
                         ```java
                         public record Contact(
                             @ColumnName("id") UUID id,
@@ -275,7 +325,7 @@
                               c.first_name,
                               c.last_name
                             FROM "user" u
-                            LEFT JOIN contact c
+                            JOIN contact c
                             ON u.id = c.user_id
                             ```
                             How to map this to a Java object? <!-- .element: class="fragment" -->
@@ -411,6 +461,115 @@
                     </section>
                 </section>
 
+                <section>
+                    <section data-markdown>
+                        # Templating
+                    </section>
+
+                    <section data-markdown>
+                        ## Dynamic criteria
+                        ```java
+                        final var whereClause = String.join(" AND ", List.of(
+                            "first_name = :firstname",
+                            "last_name = :lastname"
+                        ));
+
+                        handle.createQuery("SELECT * FROM contact WHERE &lt;whereClause&gt;")
+                            .define("whereClause", where)
+                            .bind("firstname", "John")
+                            .bind("lastname", "Doe")
+                            .mapTo(Contact.class)
+                            .findFirst();
+                        ```
+                    </section>
+                </section>
+
+                <section>
+                    <section data-markdown>
+                        # Testing
+                    </section>
+
+                    <section  data-markdown>
+                        ## [Testcontainers](https://testcontainers.com/)
+
+                        ```java
+                        @BeforeALl
+                        static void beforeTests() {
+                            var postgres = new PostgreSQLContainer<>(
+                                DockerImageName.parse("postgres:16")
+                            );
+                            postgres.start();
+                        }
+                        ```
+
+                        ```java
+                        @AfterAll
+                        static void afterTests() {
+                            postgres.start();
+                        }
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        <script type="text/template">
+                            ### Other approaches
+                            * Using in-memory database <!-- .element: class="fragment" -->
+                            * Try<!-- .element: class="fragment" --> [pg-embedded](https://pg-embedded.softwareforge.de/release-5.1.0/index.html)
+                            * Static database and transactions <!-- .element: class="fragment" -->
+                        </script>
+                    </section>
+
+                    <section data-markdown>
+                        ## Rollback strategy
+                        ```java
+                        @Autowired private Jdbi jdbi;
+                        private RepoUnderTest repo;
+                        private TransactionHandler transactionHandler;
+                        private Handle handle;
+
+                        @BeforeEach
+                        void beforeTest() {
+                            final var jdbiFacade = mock(Jdbi.class);
+
+                            this.transactionHandler = jdbi.getTransactionHandler();
+                            this.handle = jdbi.open();
+                            transactionHandler.begin(handle);
+
+                            doAnswer(
+                                invocation -> {
+                                    final var argument = invocation.getArgument(
+                                        0,
+                                        HandleConsumer.class
+                                    );
+                                argument.useHandle(handle);
+                                return null;
+                            })
+                                .when(jdbiFacade)
+                                .useHandle(any());
+
+                            // ... other handle calls
+
+                            this.repo = new RepoUnderTest(jdbiFacade);
+                        }
+
+                        @AfterEach
+                        void afterTest() {
+                            transactionHandler.rollback(handle);
+                            this.handle.close();
+                        }
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        ### Testing with Declarative API
+                        * Unverified Disclaimer
+                        ```java
+                        final var handle = jdbi.open();
+                        final var repository = handle.attach(Repository.class);
+                        repository.insertInTransaction();
+                        ```
+                    </section>
+                </section>
 
                 <section>
                     <section data-markdown>
@@ -427,6 +586,11 @@
                         * Common Table Expression
                         * Available in modern SQL databases
                         * Also known as `WITH` clause
+                    </section>
+
+                    <section data-markdown>
+                        ## Impedance Mismatch
+                        OOP 🥊 RDMBS
                     </section>
 
                     <section data-markdown>
@@ -493,17 +657,25 @@
                         ```
                     </section>
 
+                    <section>
+                        <h2>Example #4</h2>
+                        <div>You're the developer of an online bookstore</div>
+                        <div class="mermaid">
+                            <pre>
+                              %%{init: {'theme': 'dark', 'themeVariables': { 'darkMode': true }}}%%
+                              erDiagram
+                                Book ||--|| Author : has
+                                Book ||--o{ Genre : belong
+                            </pre>
+                        </div>
+                    </section>
+
                     <section data-markdown>
-                        <script type="text/template">
-                            ## Example #4
-                            * You're the developer of an online bookstore
-                            * Books have authors _(n:m)_
-                            * Books have genres _(n:m)_
-                            * Implement <!-- .element: class="fragment" --> a `PUT` request
-                              * Including genres
-                              * Genres should be created if they do not exist
-                              * Response should include details of related entities
-                        </script>
+                        ## Example #4
+                        Implement a `PUT` request
+                        * Including genres
+                        * Genres should be created if they do not exist
+                        * Response should include details of related entities
                     </section>
 
                     <section data-markdown>
@@ -577,75 +749,112 @@
                             Joins are not correct, but you get the idea <!-- .element: class="fragment" -->
                         </script>
                     </section>
+
+                    <section data-markdown>
+                        ## Next challenge
+
+                        You want to insert copies of records ("templates") with additional attributes.
+                    </section>
+
+                    <section data-markdown>
+                        ### Copy
+                        ```sql
+                        INSERT INTO object (attribute) SELECT attribute FROM template
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        ### Static addition
+                        ```sql
+                        INSERT INTO object (attribute, additional)
+                        SELECT attribute, :additional FROM template
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        ### Dynamic addition
+                        ```sql
+                        INSERT INTO object (attribute, additional)
+                        SELECT t.attribute, d.additional FROM template t
+                        JOIN (VALUES &lt;additional&gt;) AS data(template_id, additional) d
+                        ON t.id = data.template_id
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        ### Jdbi code
+                        ```java
+                        record InsertData(UUID templateId, String additional) {}
+                        ```
+
+                        ```java
+                        final var data = List.of(
+                            new InsertData(templateId, "additional1"),
+                            new InsertData(templateId, "additional2")
+                        );
+
+                        jdbi.withHandle(handle ->
+                            handle
+                                .createUpdate("...") // see previous slide
+                                .bindMethodsList(
+                                    "additional",
+                                    data,
+                                    List.of("templateId", "additional"))
+                                .execute());
+                        ```
+                    </section>
+
+                    <section data-markdown>
+                        ## Common Pitfalls
+
+                        1. `NULL` values
+                            ```java
+                            // If you want to compare to NULL
+                            handle.bindNull("attribute", Types.VARCHAR);
+                            ```
+
+                        2. Parameters
+                            ```sql
+                            SELECT * FROM object WHERE attribute IS :value AND list IS IN (&lt;list&gt;)
+                            ```
+                    </section>
                 </section>
 
                 <section>
                     <section data-markdown>
-                        # Testing
-                    </section>
-
-                    <section  data-markdown>
-                        ## Easy [Testcontainers](https://testcontainers.com/)
-                        ```java
-                        @BeforeALl
-                        static void beforeTests() {
-                            var postgres = new PostgreSQLContainer<>(
-                                DockerImageName.parse("postgres:16")
-                            );
-                            postgres.start();
-                        }
-                        ```
+                        # Migrations
                     </section>
 
                     <section data-markdown>
-                        ## Rollback
-                        Wrap Jdbi in a transaction
-                        ```java
-                        @Autowired private Jdbi jdbi;
-                        private RepoUnderTest repo;
-                        private TransactionHandler transactionHandler;
-                        private Handle handle;
-
-                        @BeforeEach
-                        void beforeTest() {
-                            final var jdbiFacade = mock(Jdbi.class);
-
-                            this.transactionHandler = jdbi.getTransactionHandler();
-                            this.handle = jdbi.open();
-                            transactionHandler.begin(handle);
-
-                            doAnswer(
-                                invocation -> {
-                                    final var argument = invocation.getArgument(
-                                        0,
-                                        HandleConsumer.class
-                                    );
-                                    argument.useHandle(handle);
-                                    return null;
-                                    })
-                                .when(jdbiFacade)
-                                .useHandle(any());
-
-                            // ... other handle calls
-
-                            this.repo = new RepoUnderTest(jdbiFacade);
-                        }
-
-                        @AfterEach
-                        void afterTest() {
-                            transactionHandler.rollback(handle);
-                            this.handle.close();
-                        }
-                        ```
+                        ## Flyway
+                        * `src/main/resources/db/migration`
+                            * Migrate `V1__name.sql`
+                            * Undo `U1__name.sql`
+                            * Repeat `R__name.sql`
                     </section>
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                        ## Uncovered topics ...
+                        * Indexing and performance <!-- .element: class="fragment" --> (`EXPLAIN`)
+                        * Views <!-- .element: class="fragment" -->
+                        * Batching <!-- .element: class="fragment" -->
+                        * Functions and extensions <!-- .element: class="fragment" -->
+                        * Different SQL dialects <!-- .element: class="fragment" -->
+                        * ... <!-- .element: class="fragment" -->
+                    </script>
                 </section>
 
                 <section>
                     <section data-markdown>
                         <script type="text/template">
                             # Last words
+
                             * It's wort exploring the docs from time to time <!-- .element: class="fragment" -->
-                            * ... and comparing different options <!-- .element: class="fragment" -->
+                            * Rarely you'll find silver bullets <!-- .element: class="fragment" -->
+                            * Embrace the puzzle 🤗️ <!-- .element: class="fragment" -->
+                            * Don't let the AI fool you <!-- .element: class="fragment" -->
                         </script>
                     </section>
 
@@ -665,6 +874,7 @@
 		<script src="plugin/notes/notes.js"></script>
 		<script src="plugin/markdown/markdown.js"></script>
 		<script src="plugin/highlight/highlight.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/reveal.js-mermaid-plugin@2.3.0/plugin/mermaid/mermaid.js"></script>
 		<script>
 			// More info about initialization & config:
 			// - https://revealjs.com/initialization/
@@ -673,7 +883,7 @@
 				hash: true,
 
 				// Learn about plugins: https://revealjs.com/plugins/
-				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes, RevealMermaid ]
 			});
 		</script>
 	</body>
