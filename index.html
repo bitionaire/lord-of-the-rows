@@ -463,29 +463,6 @@
 
                 <section>
                     <section data-markdown>
-                        # Templating
-                    </section>
-
-                    <section data-markdown>
-                        ## Dynamic criteria
-                        ```java
-                        final var whereClause = String.join(" AND ", List.of(
-                            "first_name = :firstname",
-                            "last_name = :lastname"
-                        ));
-
-                        handle.createQuery("SELECT * FROM contact WHERE &lt;whereClause&gt;")
-                            .define("whereClause", where)
-                            .bind("firstname", "John")
-                            .bind("lastname", "Doe")
-                            .mapTo(Contact.class)
-                            .findFirst();
-                        ```
-                    </section>
-                </section>
-
-                <section>
-                    <section data-markdown>
                         # Testing
                     </section>
 
@@ -807,16 +784,30 @@
                     <section data-markdown>
                         ## Common Pitfalls
 
-                        1. `NULL` values
-                            ```java
-                            // If you want to compare to NULL
-                            handle.bindNull("attribute", Types.VARCHAR);
-                            ```
+                        ### Parameters
+                        ```sql
+                        SELECT * FROM object WHERE attribute IS :value AND list IS IN (&lt;list&gt;)
+                        ```
+                    </section>
 
-                        2. Parameters
-                            ```sql
-                            SELECT * FROM object WHERE attribute IS :value AND list IS IN (&lt;list&gt;)
-                            ```
+                    <section data-markdown>
+                        ## Common Pitfalls
+
+                        ### `NULL` values
+                        ```java
+                        // If you want to compare to NULL
+                        handle.bindNull("attribute", Types.VARCHAR);
+                        ```
+
+                        ... with lists
+
+                        ```sql
+                        ... WHERE (COALESCE(&lt;list&gt;) IS NULL OR list_column IN (&lt;list&gt;))
+                        ```
+
+                        ```java
+                        handle.bindList(NULL_KEYWORD, "list", list)
+                        ```
                     </section>
                 </section>
 
