@@ -236,7 +236,7 @@
                         ```java
                         interface ContactDao {
                             @SqlQuery("SELECT * FROM contact WHERE firstname = :firstname")
-                            Contact findByFirstname(@Bind("firstname") String id);
+                            Contact findByFirstname(@Bind("firstname") String firstname);
                         }
 
                         // Initialize Jdbi
